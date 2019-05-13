@@ -60,17 +60,27 @@ class Upload extends AdminController {
     }
 
 
+    /**
+     * markdown单图上传
+     * @return \think\response\Json
+     */
     public function oneImage()
     {
         $files = request()->file('editormd-image-file');
         if(empty($files))  return json(['success' => 0, 'message ' => '请上传图片']);
-        $info = $files->move('../public/static/uploads');
+        $info = $files->validate(['ext' => 'jpg,png,gif,JPG,PNG,GIF'])->move('../public/static/uploads');
         if ($info) {
             $url = '/static/uploads/' . date('Ymd') . '/' . $info->getFilename();
-            return json(['success' => 1, 'message ' => '上传成功', 'url' => $url]);
         } else {
             return json(['success' => 0, 'message ' => $files->getError()]);
         }
+
+        //判断是否使用七牛云上传
+        $file_type = Db::name('SystemConfig')->where(['name' => 'FileType', 'group' => 'file'])->value('value');
+        if ($file_type == 2) {
+            $url = QiniuService::upload($url);
+        }
+        return json(['success' => 1, 'message ' => '上传成功', 'url' => $url]);
     }
 
 }
