@@ -59,6 +59,8 @@ class MailService {
      */
     public static function send($toemail, $title, $info) {
         self::__init();
+        //邮件正文是否为html编码 注意此处是一个方法 不再是属性 true或false
+        self::$mail->isHTML(true);
         self::$mail->Subject = $title;
         self::$mail->Body = $info;
 //        self::$mail->addCC("xxx@163.com");// 设置邮件抄送人，可以只写地址，上述的设置也可以只写地址(这个人也能收到邮件)
@@ -70,6 +72,7 @@ class MailService {
         if (is_array($toemail)) {
             foreach ($toemail as $vo) {
                 self::$mail->addAddress($vo, 'send');
+
                 !self::$mail->send() ? $msg[] = ['mail' => $vo, 'msg' => self::$mail->ErrorInfo] : $msg[] = ['mail' => $vo, 'msg' => '邮箱发送成功！'];
             }
             return ['code' => 1, 'msg' => $msg];

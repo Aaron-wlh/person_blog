@@ -42,18 +42,33 @@ class AuthService {
         //获取当前用户角色组信息 ,拆表
         $user = new \app\admin\model\User;
         $auth_id_list = json_decode($user->where(['id' => session('user.id'), 'status' => 1, 'is_deleted' => 0])->value('auth_id'), true);
-        //去除失效的角色组信息
-        foreach ($auth_id_list as $k => $val) {
-            if (empty(model('SysAuth')->where(['id' => $val, 'status' => 1])->find())) unset($auth_id_list[$k]);
-        }
+
+        /**
+         *
+        去除失效的角色组信息
+        优化  原代码当用户有多个角色的时候，没多一个角色就多查一次数据库
+            foreach ($auth_id_list as $k => $val) {
+                if (empty(model('SysAuth')->where(['id' => $val, 'status' => 1])->find())) unset($auth_id_list[$k]);
+            }
+            //判断是否有权限访问
+            foreach ($auth_id_list as $vo) {
+                if ($vo == 0) return true; //超级管理员组权限
+                $is_auth_node = model('SysAuthNode')->where(['auth' => $vo, 'node' => $is_auth['id']])->find();
+                if (!empty($is_auth_node)) return true;
+            }
+            return false;
+         * */
+
+        $auth_id_list = model('SysAuth')->where('id', 'in', $auth_id_list)
+            ->column('id');
 
         //判断是否有权限访问
-        foreach ($auth_id_list as $vo) {
-            if ($vo == 0) return true; //超级管理员组权限
-            $is_auth_node = model('SysAuthNode')->where(['auth' => $vo, 'node' => $is_auth['id']])->find();
-            if (!empty($is_auth_node)) return true;
-        }
-        return false;
+        $auth_nodes = model('SysAuthNode')->where('auth', 'in', $auth_id_list)
+            ->column('node');
+        return in_array($is_auth['id'], $auth_nodes) ? true : false;
+
+
+
     }
 
     /**
