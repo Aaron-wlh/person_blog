@@ -248,6 +248,7 @@ class Menu extends ModelService {
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
+    //有用户表（有角色表id）system_user、用户角色表system_auth，角色权限表system_auth_node，权限表system_node
     public static function getMenuApi($menu_list = []) {
         $field = 'id, pid, title, icon, href, spread, target';
         $order = ['sort' => 'asc', 'create_at' => 'desc'];
@@ -257,7 +258,9 @@ class Menu extends ModelService {
             $i = 0;
             $where_first_menu = [['pid', '=', $vo['id']], ['status', '=', 1]];
             $first_menu = self::field($field)->where($where_first_menu)->order($order)->select()->toArray();
+            //halt($first_menu); 二级菜单  文章管理这种
             foreach ($first_menu as $vo_1) {
+                //验证该节点是否在用户的节点权限里
                 if (auth($vo_1['href'])) {
                     if (!empty($vo_1['href']) && $vo_1['href'] != "#") {
                         $vo_1['href'] = url($vo_1['href']);
