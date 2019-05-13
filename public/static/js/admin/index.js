@@ -70,6 +70,8 @@ layui.use(['bodyTab', 'form', 'element', 'layer', 'jquery'], function () {
         $.get(tab.tabConfig.url, function (data) {
             console.log('***********初始化菜单栏************');
             console.log(data);
+            console.log(tab.tabConfig.url);
+
             for (var item in data) {
                 console.log(item);//得到键
                 dataStr = data[item];

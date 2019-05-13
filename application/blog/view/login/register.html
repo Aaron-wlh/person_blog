@@ -39,7 +39,7 @@
             </div>
         </form>
         <div class="main_right">
-            <div class="tips">我们诚挚的邀请您加入<br/>久久PHP社区！</div>
+            <div class="tips">我们诚挚的邀请您加入<br/>本博客！</div>
             <div class="box">
                 已有账户：<a data-href="{:url('@blog/login')}">直接登录</a><br/><br/>
             </div>
@@ -64,7 +64,7 @@
         }
         $.request.post("{:url('@blog/login/register')}", data, function (res) {
             $.msg.success(res.msg, function () {
-                window.location.href = "{:url('@blog/login')}";
+                window.location.href = "{:url('@blog/index/index')}";
             })
         });
         return false;

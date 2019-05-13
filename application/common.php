@@ -151,6 +151,83 @@ if (!function_exists('alert')) {
     }
 }
 
+
+if(! function_exists('email_template')) {
+    /**
+     * 注册发送邮件的模板
+     * @param $url
+     * @return string
+     */
+    function email_template($url) {
+        $time  = date('Y-m-d');
+        $template = <<<EOT
+                <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>注册确认链接</title>
+            </head>
+            <body>
+                <div class="open_email" style="margin-left: 8px; margin-top: 8px; margin-bottom: 8px; margin-right: 8px;">
+                    <div>
+                        <span class="genEmailNicker">
+                        
+                        </span>
+                                <br>
+                                <span class="genEmailContent">
+                                    <div></div>
+                                    <p style="color:black">尊敬的用户 ：</p>
+                                    <br><br>
+                                    <p style="color:black">&nbsp;&nbsp;&nbsp; 您好！感谢您注册成为本博客的用户。</p>
+                                    <br><br>
+                                    <p style="color:black">&nbsp;&nbsp;&nbsp; 这是一封注册认证邮件，请点击以下链接确认：</p>
+                                    <p style="color:black">&nbsp;&nbsp;&nbsp; 
+                                    <a href="{$url}" rel="noopener" target="_blank">{$url}</a> </p>
+                                    <br><br>
+                                    <p style="color:black">&nbsp;&nbsp;&nbsp; 如果链接不能点击，请复制地址到浏览器，然后直接打开。</p>
+                                    <br><br>                              
+                                    <div style="text-align:right">blog.weilonghai.club</div>
+                                    <div style="text-align:right"><span style="border-bottom:1px dashed #ccc;" t="5" times="">{$time}</span> </div>
+                                    <div></div>
+                                </span>
+                                <br>
+                                <span class="genEmailTail"></span>
+                    </div>
+                </div>
+            </body>
+            </html>
+EOT;
+        return $template;
+    }
+}
+
+
+if(! function_exists('api_limit')) {
+    /**
+     * 请求接口限制
+     * @param string $api 接口名
+     * @param int $limit 接口次数
+     * @param int $time 接口过期时间
+     * @return bool
+     */
+    function api_limit($api, $limit, $time) {
+        $cacheKey = get_ip() . $api;
+        if(cache("?$cacheKey")) {
+            //已经使用接口的次数
+            $cacheValue = cache($cacheKey);
+            $cacheArr = explode(',', $cacheValue);
+            $useLimited = $cacheArr[0];
+            $startTime = $cacheArr[1];
+            if ($useLimited >= $limit) return false;
+            //重新设置cache 过期时间需要减去已经过去的时间
+            cache($cacheKey, ($useLimited + 1) . ',' . $startTime, $time - (time()-$startTime));
+        } else {
+            cache($cacheKey, 0 . ',' . time(), $time);
+        }
+        return true;
+    }
+}
+
 if (!function_exists('msg_success')) {
 
     /**
@@ -498,5 +575,22 @@ if (!function_exists('P')) {
     function P($data)
     {
         \think\facade\Log::record($data, 'record');
+    }
+}
+
+if (!function_exists('getRandChar')) {
+    function getRandChar($length)
+    {
+        $str = null;
+        $strPol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+        $max = strlen($strPol) - 1;
+
+        for ($i = 0;
+             $i < $length;
+             $i++) {
+            $str .= $strPol[rand(0, $max)];
+        }
+
+        return $str;
     }
 }
