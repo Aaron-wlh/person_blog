@@ -60,6 +60,7 @@ class Member extends ModelService {
         $login = $this->where($where_login)->find();
         if (empty($login)) return ['code' => 1, 'msg' => '账户不存在，请重新输入！'];
         if ($login['password'] != password($password)) return ['code' => 1, 'msg' => '密码不正确，请重新输入！'];
+        if($login['activated'] == 1) return ['code' => 1, 'msg' => '你的账号未激活，请检查邮箱中的注册邮件进行激活。'];
         unset($login['password']);
         return ['code' => 0, 'msg' => '登录成功，正在进入系统！', 'member' => $login];
     }
@@ -79,7 +80,7 @@ class Member extends ModelService {
             return __error('数据有误，请稍后再试！');
         }
         $this->commit();
-        return __success('会员注册成功！');
+        return __success('验证邮件已发送到你的注册邮箱上，请注意查收。');
     }
 
     /**
